@@ -32,6 +32,13 @@ function __SHELLFROMBLOCKS_i__BLOCK_FINISH {
         out_file.write("""
     esac
 }""")
+        for block in file_content:
+
+            out_file.write(f"""
+
+function __SHELLFROMBLOCKS_f__{block['name']} {{
+{block['config']['Script']}
+}}""")
 
 if __name__ == '__main__':
     main()
