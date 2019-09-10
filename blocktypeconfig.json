@@ -1,0 +1,11 @@
+{
+    "ScriptBlock": {
+
+        "n_input": 1,
+        "n_output": 2,
+        "config": {
+
+            "Script": "Text(80, 30)"
+        }
+    }
+}

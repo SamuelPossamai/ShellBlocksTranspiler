@@ -2,43 +2,33 @@
 import sys
 import json
 
+from jinja2 import Environment, FileSystemLoader
+
+def create_out_list(blocks, block):
+
+    output = block.get('output')
+
+    if output is None:
+        return ()
+
+    return (blocks[out_block['block']]['name'] for out_block in block.get('output'))
+
 def main():
+
+    jinja_env = Environment(loader=FileSystemLoader('.'))
+
     if len(sys.argv) != 3:
         print('Wrong number of arguments', file=sys.stderr)
 
     with open(sys.argv[1]) as in_file:
-        file_content = json.load(in_file)
+        blocks = json.load(in_file)
 
     with open(sys.argv[2], 'w') as out_file:
 
-        out_file.write("""
-#!/bin/bash
+        template = jinja_env.get_template('template.sh')
+        write_content = template.render(blocks=blocks, create_out_list=create_out_list)
 
-function __SHELLFROMBLOCKS_i__BLOCK_FINISH {
-
-    local out_list;
-
-    case $1 in""")
-
-        for block in file_content:
-
-            out_list = ( file_content[out_block['block']]['name'] for out_block in block.get('output') or ())
-
-            out_file.write(f"""
-        {block['name']})
-            out_list="{' '.join(out_list)}";;""")
-            block['name']
-
-        out_file.write("""
-    esac
-}""")
-        for block in file_content:
-
-            out_file.write(f"""
-
-function __SHELLFROMBLOCKS_f__{block['name']} {{
-{block['config']['Script']}
-}}""")
+        out_file.write(write_content)
 
 if __name__ == '__main__':
     main()
