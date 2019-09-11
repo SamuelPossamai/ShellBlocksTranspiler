@@ -31,6 +31,7 @@ function __SHELLFROMBLOCKS_i__LOCK {
     while true
     do
         lockfile -r 0 $__SHELLFROMBLOCKS_v__LOCK_FILE && break
+        sleep 0.002
     done
 }
 
@@ -46,8 +47,10 @@ function __SHELLFROMBLOCKS_i__DO_BEFORE {
 
 function __SHELLFROMBLOCKS_i__DO_AFTER {
 
+    while [ -f "$__SHELLFROMBLOCKS_v__CHILD_ID_FILE" ] ; do sleep 0.01 ; done
+
     __SHELLFROMBLOCKS_i__LOCK
-    echo $$ > $__SHELLFROMBLOCKS_v__CHILD_ID_FILE
+    echo $BASHPID > $__SHELLFROMBLOCKS_v__CHILD_ID_FILE
     __SHELLFROMBLOCKS_i__UNLOCK
 }
 
@@ -68,5 +71,10 @@ do
 
     __SHELLFROMBLOCKS_i__LOCK
     __SHELLFROMBLOCKS_i__P_FINISHED ${__SHELLFROMBLOCKS_v__JOB_LIST[$(cat $__SHELLFROMBLOCKS_v__CHILD_ID_FILE)]}
+    rm -f $__SHELLFROMBLOCKS_v__CHILD_ID_FILE
     __SHELLFROMBLOCKS_i__UNLOCK
+
+    if ! jobs %% &> /dev/null; then
+        break
+    fi
 done
