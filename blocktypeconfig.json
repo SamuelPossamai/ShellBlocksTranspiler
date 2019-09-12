@@ -1,8 +1,14 @@
 {
+    "Init": {
+
+        "n_input": 0,
+        "n_output": 1,
+        "config": {}
+    },
     "ScriptBlock": {
 
         "n_input": 1,
-        "n_output": 2,
+        "n_output": 1,
         "config": {
 
             "Script": "Text(80, 30)"

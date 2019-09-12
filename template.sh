@@ -10,7 +10,7 @@ function __SHELLFROMBLOCKS_i__BLOCK_FINISH {
     esac
 }
 
-{% for block in blocks %}
+{% for block in script_blocks %}
 function __SHELLFROMBLOCKS_f__{{ block['name'] }} {
     __SHELLFROMBLOCKS_i__DO_BEFORE
     {% for line in block['config']['Script'].split('\n') %}{% if line %}
@@ -78,7 +78,9 @@ function __SHELLFROMBLOCKS_i__P_FINISHED {
     done
 }
 
-__SHELLFROMBLOCKS_i__P_FINISHED main
+{% for block in init_blocks %}
+__SHELLFROMBLOCKS_i__P_FINISHED {{ block['name'] }}
+{% endfor %}
 
 while true
 do

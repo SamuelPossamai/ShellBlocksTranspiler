@@ -11,7 +11,8 @@ def create_out_list(blocks, block):
     if output is None:
         return ()
 
-    return (blocks[out_block['block']]['name'] for out_block in block.get('output'))
+    return (blocks[out_block['block']]['name']
+            for out_block in block.get('output'))
 
 def main():
 
@@ -25,8 +26,17 @@ def main():
 
     with open(sys.argv[2], 'w') as out_file:
 
+        script_blocks = tuple((block for block in blocks
+                               if block['type'] == 'ScriptBlock'))
+
+        init_blocks = tuple((block for block in blocks
+                             if block['type'] == 'Init'))
+
         template = jinja_env.get_template('template.sh')
-        write_content = template.render(blocks=blocks, create_out_list=create_out_list)
+        write_content = template.render(blocks=blocks,
+                                        create_out_list=create_out_list,
+                                        script_blocks=script_blocks,
+                                        init_blocks=init_blocks)
 
         out_file.write(write_content)
 
