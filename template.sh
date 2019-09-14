@@ -36,11 +36,22 @@ function __SHELLFROMBLOCKS_i__LOCK {
         lock_suffix='global'
     fi
 
-    while true
-    do
-        lockfile -r 0 ${__SHELLFROMBLOCKS_v__LOCK_FILE_BASE}_$lock_suffix &> /dev/null && break
-        sleep 0.002
-    done
+    lockfile -0.02 -r -1 ${__SHELLFROMBLOCKS_v__LOCK_FILE_BASE}_$lock_suffix &> /dev/null
+}
+
+function __SHELLFROMBLOCKS_i__TRYLOCK {
+
+    local lock_suffix
+
+    if [ "$1" ] ; then
+        lock_suffix=$1
+    else
+        lock_suffix='global'
+    fi
+
+    lockfile -r 0 ${__SHELLFROMBLOCKS_v__LOCK_FILE_BASE}_$lock_suffix &> /dev/null
+
+    return $?
 }
 
 function __SHELLFROMBLOCKS_i__UNLOCK {
@@ -63,10 +74,19 @@ function __SHELLFROMBLOCKS_i__DO_BEFORE {
 
 function __SHELLFROMBLOCKS_i__DO_AFTER {
 
-    __SHELLFROMBLOCKS_i__LOCK
-    __SHELLFROMBLOCKS_i__LOCK child_id_write
-    echo $BASHPID > $__SHELLFROMBLOCKS_v__CHILD_ID_FILE
-    __SHELLFROMBLOCKS_i__UNLOCK
+    while true
+    do
+        __SHELLFROMBLOCKS_i__LOCK
+        if ! __SHELLFROMBLOCKS_i__TRYLOCK child_id_write ; then
+            __SHELLFROMBLOCKS_i__UNLOCK
+            continue
+        fi
+        echo $BASHPID > $__SHELLFROMBLOCKS_v__CHILD_ID_FILE
+        __SHELLFROMBLOCKS_i__UNLOCK
+
+        sleep 0.02
+        break
+    done
 }
 
 function __SHELLFROMBLOCKS_i__P_FINISHED {
