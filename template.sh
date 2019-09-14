@@ -20,11 +20,35 @@ function __SHELLFROMBLOCKS_f__{{ block['name'] }} {
 }
 
 {% endfor %}
+{% for block in sync_blocks %}
+function __SHELLFROMBLOCKS_f__{{ block['name'] }} {
+    __SHELLFROMBLOCKS_i__DO_SYNC "{{ block['name'] }}" $2 2
+}
 
+{% endfor %}
+export __SHELLFROMBLOCKS_v__SYNC_FILE_BASE="/dev/shm/__shellfromblocks_$$_sync_file"
 export __SHELLFROMBLOCKS_v__LOCK_FILE_BASE="/tmp/__shellfromblocks_lock_$$"
 export __SHELLFROMBLOCKS_v__CHILD_ID_FILE="/dev/shm/__shellfromblocks_$$_child_id"
 
 declare -A __SHELLFROMBLOCKS_v__JOB_LIST
+
+function __SHELLFROMBLOCKS_i__DO_SYNC {
+    __SHELLFROMBLOCKS_i__DO_BEFORE
+
+    local filename_base
+    local i
+
+    filename_base="${__SHELLFROMBLOCKS_v__SYNC_FILE_BASE}_$1_"
+
+    echo '1' > "${filename_base}$2"
+
+    for(( i = 0 ; i < $3; i++))
+    do
+        [ "$(cat ${filename_base}$i 2> /dev/null)" = '1' ] || exit
+    done
+
+    __SHELLFROMBLOCKS_i__DO_AFTER
+}
 
 function __SHELLFROMBLOCKS_i__LOCK {
 
@@ -91,9 +115,18 @@ function __SHELLFROMBLOCKS_i__DO_AFTER {
 
 function __SHELLFROMBLOCKS_i__P_FINISHED {
 
-    for job in $(__SHELLFROMBLOCKS_i__BLOCK_FINISH $1)
+    local job_info
+    local job
+    local input_number
+    local output_number
+
+    for job_info in $(__SHELLFROMBLOCKS_i__BLOCK_FINISH $1)
     do
-        __SHELLFROMBLOCKS_f__$job &
+        job=${job_info%@#*}
+        input_number=${job_info##*@#}
+        output_number=${input_number%:*}
+        input_number=${input_number#*:}
+        __SHELLFROMBLOCKS_f__$job $output_number $input_number &
         __SHELLFROMBLOCKS_v__JOB_LIST[$!]=$job
     done
 }
@@ -107,7 +140,11 @@ do
     wait -n
 
     __SHELLFROMBLOCKS_i__LOCK
-    __SHELLFROMBLOCKS_i__P_FINISHED ${__SHELLFROMBLOCKS_v__JOB_LIST[$(cat $__SHELLFROMBLOCKS_v__CHILD_ID_FILE)]}
+
+    __SHELLFROMBLOCKS_mv__CHILD_ID=$(cat $__SHELLFROMBLOCKS_v__CHILD_ID_FILE 2> /dev/null)
+    if [ "$__SHELLFROMBLOCKS_mv__CHILD_ID" ] ; then
+        __SHELLFROMBLOCKS_i__P_FINISHED ${__SHELLFROMBLOCKS_v__JOB_LIST[$__SHELLFROMBLOCKS_mv__CHILD_ID]}
+    fi
     rm -f $__SHELLFROMBLOCKS_v__CHILD_ID_FILE
     __SHELLFROMBLOCKS_i__UNLOCK child_id_write
     __SHELLFROMBLOCKS_i__UNLOCK

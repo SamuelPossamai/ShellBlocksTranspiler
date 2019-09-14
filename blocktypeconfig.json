@@ -13,5 +13,11 @@
 
             "Script": "Text(80, 30)"
         }
+    },
+    "Synchronize": {
+
+        "n_input": 2,
+        "n_output": 1,
+        "config": {}
     }
 }

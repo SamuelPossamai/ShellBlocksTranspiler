@@ -11,8 +11,9 @@ def create_out_list(blocks, block):
     if output is None:
         return ()
 
-    return (blocks[out_block['block']]['name']
-            for out_block in block.get('output'))
+    return ((f'{blocks[out_block["block"]]["name"]}@#'
+             f'{out_block["output_number"]}:{out_block["input_number"]}')
+            for out_block in output)
 
 def main():
 
@@ -32,10 +33,14 @@ def main():
         init_blocks = tuple((block for block in blocks
                              if block['type'] == 'Init'))
 
+        sync_blocks = tuple((block for block in blocks
+                             if block['type'] == 'Synchronize'))
+
         template = jinja_env.get_template('template.sh')
         write_content = template.render(blocks=blocks,
                                         create_out_list=create_out_list,
                                         script_blocks=script_blocks,
+                                        sync_blocks=sync_blocks,
                                         init_blocks=init_blocks)
 
         out_file.write(write_content)
