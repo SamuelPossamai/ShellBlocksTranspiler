@@ -3,7 +3,8 @@
 
         "n_input": 0,
         "n_output": 1,
-        "config": {}
+        "config": {},
+        "bg_color": "lightblue"
     },
     "ScriptBlock": {
 
@@ -12,12 +13,41 @@
         "config": {
 
             "Script": "Text(80, 30)"
-        }
+        },
+        "bg_color": "lightyellow"
     },
-    "Synchronize": {
+    "ScriptBlock(2->1)": {
 
         "n_input": 2,
         "n_output": 1,
-        "config": {}
+        "config": {
+
+            "Script": "Text(80, 30)"
+        },
+        "bg_color": "lightyellow"
+    },
+    "ScriptBlock(3->1)": {
+
+        "n_input": 3,
+        "n_output": 1,
+        "config": {
+
+            "Script": "Text(80, 30)"
+        },
+        "bg_color": "lightyellow"
+    },
+    "Synchronize(2)": {
+
+        "n_input": 2,
+        "n_output": 1,
+        "config": {},
+        "bg_color": "lightgreen"
+    },
+    "Synchronize(3)": {
+
+        "n_input": 3,
+        "n_output": 1,
+        "config": {},
+        "bg_color": "lightgreen"
     }
 }

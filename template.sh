@@ -26,9 +26,10 @@ function __SHELLFROMBLOCKS_f__{{ block['name'] }} {
 }
 
 {% endfor %}
-export __SHELLFROMBLOCKS_v__SYNC_FILE_BASE="/dev/shm/__shellfromblocks_$$_sync_file"
+export __SHELLFROMBLOCKS_v__SHMEM_BASENAME="/dev/shm/__shellfromblocks_$$"
+export __SHELLFROMBLOCKS_v__SYNC_FILE_BASE="${__SHELLFROMBLOCKS_v__SHMEM_BASENAME}_sync_file"
 export __SHELLFROMBLOCKS_v__LOCK_FILE_BASE="/tmp/__shellfromblocks_lock_$$"
-export __SHELLFROMBLOCKS_v__CHILD_ID_FILE="/dev/shm/__shellfromblocks_$$_child_id"
+export __SHELLFROMBLOCKS_v__CHILD_ID_FILE="${__SHELLFROMBLOCKS_v__SHMEM_BASENAME}_child_id"
 
 declare -A __SHELLFROMBLOCKS_v__JOB_LIST
 
@@ -45,6 +46,11 @@ function __SHELLFROMBLOCKS_i__DO_SYNC {
     for(( i = 0 ; i < $3; i++))
     do
         [ "$(cat ${filename_base}$i 2> /dev/null)" = '1' ] || exit
+    done
+
+    for(( i = 0 ; i < $3; i++))
+    do
+        echo '0' > "${filename_base}$i"
     done
 
     __SHELLFROMBLOCKS_i__DO_AFTER
@@ -153,3 +159,5 @@ do
         break
     fi
 done
+
+rm -f $__SHELLFROMBLOCKS_v__SHMEM_BASENAME*

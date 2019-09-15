@@ -28,13 +28,13 @@ def main():
     with open(sys.argv[2], 'w') as out_file:
 
         script_blocks = tuple((block for block in blocks
-                               if block['type'] == 'ScriptBlock'))
+                               if block['type'].startswith('ScriptBlock')))
 
         init_blocks = tuple((block for block in blocks
                              if block['type'] == 'Init'))
 
         sync_blocks = tuple((block for block in blocks
-                             if block['type'] == 'Synchronize'))
+                             if block['type'].startswith('Synchronize')))
 
         template = jinja_env.get_template('template.sh')
         write_content = template.render(blocks=blocks,
