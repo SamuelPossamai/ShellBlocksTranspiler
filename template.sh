@@ -22,7 +22,7 @@ function __SHELLFROMBLOCKS_f__{{ block['name'] }} {
 {% endfor %}
 {% for block in sync_blocks %}
 function __SHELLFROMBLOCKS_f__{{ block['name'] }} {
-    __SHELLFROMBLOCKS_i__DO_SYNC "{{ block['name'] }}" $2 2
+    __SHELLFROMBLOCKS_i__DO_SYNC "{{ block['name'] }}" $2 "{{ block['inputs'] }}"
 }
 
 {% endfor %}
@@ -148,16 +148,19 @@ do
     __SHELLFROMBLOCKS_i__LOCK
 
     __SHELLFROMBLOCKS_mv__CHILD_ID=$(cat $__SHELLFROMBLOCKS_v__CHILD_ID_FILE 2> /dev/null)
+
     if [ "$__SHELLFROMBLOCKS_mv__CHILD_ID" ] ; then
         __SHELLFROMBLOCKS_i__P_FINISHED ${__SHELLFROMBLOCKS_v__JOB_LIST[$__SHELLFROMBLOCKS_mv__CHILD_ID]}
+        rm -f $__SHELLFROMBLOCKS_v__CHILD_ID_FILE
     fi
-    rm -f $__SHELLFROMBLOCKS_v__CHILD_ID_FILE
-    __SHELLFROMBLOCKS_i__UNLOCK child_id_write
-    __SHELLFROMBLOCKS_i__UNLOCK
 
     if ! jobs %% &> /dev/null; then
         break
     fi
+
+    __SHELLFROMBLOCKS_i__UNLOCK child_id_write
+    __SHELLFROMBLOCKS_i__UNLOCK
+
 done
 
 rm -f $__SHELLFROMBLOCKS_v__SHMEM_BASENAME*
